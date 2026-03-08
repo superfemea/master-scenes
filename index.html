@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Scenes — Protocolo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Courier+Prime:ital,wght@0,400;1,400&family=Josefin+Sans:wght@100;300;400&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --ink: #0d0a08;
+  --bone: #f0eae0;
+  --bone-dim: #d4ccc0;
+  --ember: #d4703a;
+  --ember-dark: #8a4a22;
+  --silver: #b0aaa2;
+  --frame: #1a1410;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* GRAIN OVERLAY */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ── FILM STRIPS ── */
+.film-strip {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+.film-strip.left { left: 0; background: #0a0806; border-right: 1px solid #1f1a14; }
+.film-strip.right { right: 0; background: #0a0806; border-left: 1px solid #1f1a14; }
+.film-holes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 0;
+  animation: filmScroll 20s linear infinite;
+}
+.film-hole {
+  width: 14px;
+  height: 10px;
+  background: var(--ink);
+  border-radius: 2px;
+  border: 1px solid #2a221a;
+  flex-shrink: 0;
+}
+@keyframes filmScroll {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(0); }
+}
+
+/* ── LAYOUT ── */
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 60px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, var(--ink));
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 100;
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.3s forwards;
+}
+
+.hero-title {
+  font-size: clamp(60px, 10vw, 110px);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  opacity: 0;
+  animation: fadeUp 1.2s ease 0.5s forwards;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--ember);
+  display: block;
+}
+
+.hero-subtitle {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 100;
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin-bottom: 60px;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.8s forwards;
+}
+
+.hero-lead {
+  max-width: 520px;
+  font-size: 19px;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--bone-dim);
+  font-style: italic;
+  opacity: 0;
+  animation: fadeUp 1s ease 1s forwards;
+  border-left: 1px solid var(--ember-dark);
+  padding-left: 28px;
+}
+
+.hero-lead strong {
+  color: var(--bone);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.scroll-cue {
+  position: absolute;
+  bottom: 40px;
+  left: 60px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--silver);
+  opacity: 0;
+  animation: fadeUp 1s ease 1.4s forwards;
+}
+
+.scroll-line {
+  width: 40px;
+  height: 1px;
+  background: var(--ember);
+  animation: expandLine 1.5s ease 1.5s forwards;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+@keyframes expandLine {
+  to { transform: scaleX(1); }
+}
+
+/* ── SCENE DIVIDER ── */
+.scene-marker {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 60px 0 40px;
+}
+.scene-num {
+  font-family: 'Courier Prime', monospace;
+  font-size: 11px;
+  color: var(--ember);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.scene-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--ember-dark), transparent);
+}
+.scene-title {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 100;
+  font-size: 9px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--silver);
+  white-space: nowrap;
+}
+
+/* ── SECTIONS ── */
+section {
+  padding: 20px 60px 80px;
+  position: relative;
+}
+
+/* ── PROBLEM SECTION ── */
+.problem-quote {
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 300;
+  line-height: 1.4;
+  font-style: italic;
+  color: var(--bone);
+  margin-bottom: 50px;
+  padding: 40px 0;
+  border-top: 1px solid #1f1a14;
+  border-bottom: 1px solid #1f1a14;
+}
+
+.problem-quote span {
+  color: var(--ember);
+}
+
+.body-text {
+  font-size: 18px;
+  color: var(--bone-dim);
+  font-weight: 400;
+  line-height: 1.9;
+  margin-bottom: 28px;
+}
+
+.body-text strong {
+  color: var(--bone);
+  font-weight: 400;
+}
+
+/* ── SYMPTOMS ── */
+.symptoms-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin: 50px 0;
+}
+
+.symptom {
+  background: var(--frame);
+  padding: 28px 24px;
+  position: relative;
+  border-left: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.symptom:hover {
+  border-left-color: var(--ember);
+}
+
+.symptom-icon {
+  font-family: 'Courier Prime', monospace;
+  font-size: 9px;
+  color: var(--ember);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.symptom p {
+  font-size: 16px;
+  color: var(--bone-dim);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+/* ── METHODOLOGY ── */
+.method-block {
+  margin-bottom: 60px;
+}
+
+.method-header {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.method-num {
+  font-family: 'Courier Prime', monospace;
+  font-size: 44px;
+  font-weight: 400;
+  color: var(--ember-dark);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.method-name {
+  font-size: 26px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--bone);
+}
+
+.method-desc {
+  font-size: 17px;
+  color: var(--bone-dim);
+  font-weight: 400;
+  line-height: 1.9;
+  padding-left: 64px;
+}
+
+/* ── PROCESS TIMELINE ── */
+.timeline {
+  position: relative;
+  padding-left: 30px;
+  margin: 50px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--ember), var(--ember-dark), transparent);
+}
+
+.tl-item {
+  position: relative;
+  padding: 0 0 44px 36px;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ember);
+  box-shadow: 0 0 12px var(--ember);
+}
+
+.tl-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.tl-content {
+  font-size: 17px;
+  color: var(--bone-dim);
+  font-weight: 400;
+  line-height: 1.85;
+}
+
+.tl-content strong {
+  color: var(--bone);
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* ── BIO ── */
+.bio-section {
+  background: var(--frame);
+  padding: 70px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bio-section::before {
+  content: 'L.D.J.';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 100px;
+  font-weight: 100;
+  color: rgba(196, 98, 45, 0.05);
+  letter-spacing: 0.3em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.bio-name {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 100;
+  font-size: 10px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 16px;
+}
+
+.bio-title {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 300;
+  line-height: 1.2;
+  font-style: italic;
+  margin-bottom: 36px;
+}
+
+.bio-credentials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 36px;
+}
+
+.cred-tag {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border: 1px solid var(--ember-dark);
+  color: var(--bone-dim);
+}
+
+.bio-text {
+  font-size: 17px;
+  color: var(--bone-dim);
+  font-weight: 400;
+  line-height: 1.9;
+  margin-bottom: 24px;
+}
+
+.bio-highlight {
+  font-style: italic;
+  font-size: 18px;
+  color: var(--bone);
+  border-left: 2px solid var(--ember);
+  padding-left: 24px;
+  margin-top: 36px;
+}
+
+/* ── OFFER BOX ── */
+.offer-section {
+  padding: 80px 60px;
+}
+
+.offer-box {
+  border: 1px solid #2a2018;
+  padding: 60px;
+  position: relative;
+  background: linear-gradient(135deg, rgba(196,98,45,0.03) 0%, transparent 60%);
+}
+
+.offer-box::before {
+  content: 'INT. SALA DE CINEMA — NOITE';
+  position: absolute;
+  top: -1px;
+  left: 30px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  color: var(--ember);
+  background: var(--ink);
+  padding: 0 10px;
+  letter-spacing: 0.05em;
+}
+
+.offer-price {
+  font-size: clamp(48px, 8vw, 80px);
+  font-weight: 300;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.offer-price span {
+  font-size: 28px;
+  color: var(--silver);
+}
+
+.offer-desc {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin-bottom: 50px;
+}
+
+.offer-list {
+  list-style: none;
+  margin-bottom: 50px;
+}
+
+.offer-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #1a1410;
+  font-size: 17px;
+  color: var(--bone-dim);
+  font-weight: 400;
+}
+
+.offer-list li::before {
+  content: '◆';
+  color: var(--ember);
+  font-size: 8px;
+  flex-shrink: 0;
+}
+
+.offer-list strong {
+  color: var(--bone);
+  font-weight: 400;
+}
+
+/* ── CTA ── */
+.cta-btn {
+  display: inline-block;
+  background: var(--ember);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  padding: 20px 48px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.cta-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: translateX(101%);
+  transition: transform 0.3s ease;
+}
+
+.cta-btn:hover {
+  color: var(--ember);
+}
+
+.cta-btn:hover::after {
+  transform: translateX(0);
+}
+
+.cta-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-note {
+  margin-top: 20px;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+
+/* ── FINAL QUOTE ── */
+.final-section {
+  padding: 100px 60px;
+  text-align: center;
+  position: relative;
+}
+
+.final-quote {
+  font-size: clamp(20px, 3.5vw, 32px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  color: var(--bone-dim);
+}
+
+.final-quote em {
+  color: var(--ember);
+  font-style: normal;
+}
+
+.final-attr {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid #1a1410;
+  padding: 30px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── PROJECTOR FLICKER ── */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.7; }
+  94% { opacity: 1; }
+  97% { opacity: 0.85; }
+  98% { opacity: 1; }
+}
+
+.hero { animation: flicker 8s infinite; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .film-strip { display: none; }
+  .hero, section, .bio-section, .offer-section, .final-section, footer {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .container { padding: 0 24px; }
+  .symptoms-grid { grid-template-columns: 1fr; }
+  .offer-box { padding: 36px 24px; }
+  .method-desc { padding-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- Film strips -->
+<div class="film-strip left">
+  <div class="film-holes">
+    <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  </div>
+</div>
+<div class="film-strip right">
+  <div class="film-holes">
+    <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  </div>
+</div>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <p class="hero-eyebrow">Letícia Dubois Jünger — Protocolo em Grupo</p>
+  <h1 class="hero-title">
+    Master
+    <em>Scenes</em>
+  </h1>
+  <p class="hero-subtitle">Integração de Sombras · Escuta Psicanalítica · Linguagem Cinematográfica</p>
+  <p class="hero-lead">
+    Você não está vivendo sua vida. Você está encenando um roteiro que nunca escolheu conscientemente.<br><br>
+    <strong>É hora de assumir o roteiro.</strong>
+  </p>
+  <div class="scroll-cue">
+    <div class="scroll-line"></div>
+    role para descobrir
+  </div>
+</section>
+
+<!-- ══════════ PROBLEMA ══════════ -->
+<section>
+  <div class="scene-marker">
+    <span class="scene-num">CENA 01</span>
+    <div class="scene-line"></div>
+    <span class="scene-title">O Problema</span>
+  </div>
+
+  <blockquote class="problem-quote reveal">
+    "Algo está fora do lugar — mas você não consegue nomear exatamente o quê. E a vida continua acontecendo,<span style="display:inline"> </span><span>como se você fosse personagem de um filme que outra pessoa escreveu.</span>"
+  </blockquote>
+
+  <p class="body-text reveal">
+    Existe uma razão pela qual certos <strong>padrões se repetem</strong>. O mesmo tipo de relacionamento que termina da mesma forma. O bloqueio que aparece sempre antes de um avanço. A sensação de estar quase lá — e recuar.
+  </p>
+
+  <p class="body-text reveal">
+    A psicologia profunda chama isso de <strong>sombra não integrada</strong>: partes da sua psique que foram reprimidas, negadas ou projetadas no mundo externo. Essas forças não desaparecem — elas enceram roteiros. Constroem o cenário. Escolhem os atores. E dirigem as cenas da sua vida de forma completamente inconsciente.
+  </p>
+
+  <div class="symptoms-grid reveal">
+    <div class="symptom">
+      <span class="symptom-icon">// padrão 01</span>
+      <p>Você encontra sempre o mesmo tipo de pessoa — e o ciclo se repete enquanto o problema parece ser "os outros".</p>
+    </div>
+    <div class="symptom">
+      <span class="symptom-icon">// padrão 02</span>
+      <p>Oportunidades chegam e algo sabota. Você está quase — e a autossabotagem se apresenta antes do desfecho.</p>
+    </div>
+    <div class="symptom">
+      <span class="symptom-icon">// padrão 03</span>
+      <p>Sua espiritualidade existe num mundo separado da sua realidade concreta. São dois filmes que nunca se cruzam.</p>
+    </div>
+    <div class="symptom">
+      <span class="symptom-icon">// padrão 04</span>
+      <p>Vazio ou falta de sentido persistem mesmo quando as coisas estão, aparentemente, funcionando.</p>
+    </div>
+    <div class="symptom">
+      <span class="symptom-icon">// padrão 05</span>
+      <p>Você reprime raiva, poder ou desejo — e então se vê rodeada de pessoas que os expressam exatamente por você.</p>
+    </div>
+    <div class="symptom">
+      <span class="symptom-icon">// padrão 06</span>
+      <p>Uma sensação de que partes importantes de você estão aprisionadas. Como força vital que não encontra saída.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ MÉTODO ══════════ -->
+<section>
+  <div class="scene-marker">
+    <span class="scene-num">CENA 02</span>
+    <div class="scene-line"></div>
+    <span class="scene-title">O Método</span>
+  </div>
+
+  <p class="body-text reveal" style="font-size:19px; color: var(--bone); font-style:italic; margin-bottom: 50px;">
+    Master Scenes é um protocolo de investigação e reescrita da própria vida. Três meses. Grupo de até 8 pessoas. Três eixos que trabalham juntos.
+  </p>
+
+  <div class="method-block reveal">
+    <div class="method-header">
+      <span class="method-num">01</span>
+      <span class="method-name">Escuta Profunda</span>
+    </div>
+    <p class="method-desc">
+      Inspirada na tradição psicanalítica, a escuta do grupo funciona como um campo de espelhamento. Ao narrar partes da sua história enquanto os outros ouvem em silêncio, certos padrões se tornam visíveis: repetições, escolhas aparentemente inexplicáveis, emoções que aparecem sempre no mesmo contexto. Não há interpretação rígida — há perguntas que ampliam o que pode estar operando inconscientemente.
+    </p>
+  </div>
+
+  <div class="method-block reveal">
+    <div class="method-header">
+      <span class="method-num">02</span>
+      <span class="method-name">Meditação Cinematográfica</span>
+    </div>
+    <p class="method-desc">
+      Todas as noites, durante quinze minutos, você revisita o seu dia como uma diretora analisando o material bruto de uma filmagem. As cenas passam na tela — conversas, decisões, momentos de tensão, encontros. A observação é distante, sem julgamento. Com o tempo, padrões que antes passavam despercebidos emergem. Você começa a ver onde reage automaticamente, onde se sabota, onde age alinhada com o que realmente quer. E então: reescreve a cena. Não como fuga, mas como ensaio psíquico para novas ações.
+    </p>
+  </div>
+
+  <div class="method-block reveal">
+    <div class="method-header">
+      <span class="method-num">03</span>
+      <span class="method-name">Escrita de Roteiro</span>
+    </div>
+    <p class="method-desc">
+      Gradualmente, episódios recorrentes da sua vida se transformam em cenas escritas no formato de master scenes — a estrutura cinematográfica que descreve contexto, personagens, conflito central e desfecho. Ao colocar no papel, você percebe que certas situações se repetem demais. A segunda etapa é reescrevê-las: não como fantasia, mas como roteiro com ações concretas. Cada cena reescrita se traduz em um plano de execução real. E o grupo acompanha.
+    </p>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline reveal">
+    <div class="tl-item">
+      <span class="tl-label">Semanas 1–2 · Abertura de Campo</span>
+      <p class="tl-content">Criação do campo de escuta. Cada pessoa narra partes da sua história enquanto o grupo pratica presença plena. <strong>Padrões começam a se tornar visíveis.</strong></p>
+    </div>
+    <div class="tl-item">
+      <span class="tl-label">Semanas 3–6 · Investigação</span>
+      <p class="tl-content">A meditação cinematográfica diária gera material. <strong>Cenas recorrentes da vida emergem e são trazidas para o grupo.</strong> O coletivo funciona como câmera: vê o que o olho do diretor não vê.</p>
+    </div>
+    <div class="tl-item">
+      <span class="tl-label">Semanas 7–10 · Reescrita</span>
+      <p class="tl-content">As cenas identificadas são <strong>reescritas no formato de roteiro.</strong> Novas versões com decisões diferentes. Planos concretos de execução são construídos.</p>
+    </div>
+    <div class="tl-item">
+      <span class="tl-label">Semanas 11–12 · Ação e Integração</span>
+      <p class="tl-content">As novas cenas precisam acontecer no mundo real. O grupo acompanha, <strong>testemunha e sustenta</strong> cada membro na execução concreta dos novos roteiros.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ BIO ══════════ -->
+<div class="bio-section reveal">
+  <p class="bio-name">Quem facilita</p>
+  <h2 class="bio-title">Letícia Dubois Jünger</h2>
+
+  <div class="bio-credentials">
+    <span class="cred-tag">Cinema & Audiovisual</span>
+    <span class="cred-tag">Videoartista</span>
+    <span class="cred-tag">Escuta Psicanalítica</span>
+    <span class="cred-tag">Integração de Sombras</span>
+    <span class="cred-tag">Espiritualidade & Gnose</span>
+  </div>
+
+  <p class="bio-text">
+    Formada em Cinema e Audiovisual, cursei quatro anos de Psicologia e estagiei em clínica psicanalítica. Não sou terapeuta — sou facilitadora. A diferença importa: trabalho com a linguagem da imagem, do símbolo e do inconsciente, não com diagnóstico.
+  </p>
+
+  <p class="bio-text">
+    Minha videoarte <em>Carne Infinita</em> — um trabalho visceral sobre o corpo, a sombra e o que não se nomeia — foi exibida em festival internacional ainda durante a graduação e me rendeu um convite para residência artística em Portugal. Vivo o que ensino: a integração da escuridão como potência criativa.
+  </p>
+
+  <p class="bio-text">
+    Nas redes, sou conhecida como <strong>Super Fêmea</strong> — um nome que carrega a ironia de quem sabe que o poder não é uma performance. Meu trabalho com espiritualidade, misticismo e integração de sombras existe porque esses temas não me parecem abstratos. São carne.
+  </p>
+
+  <p class="bio-highlight">
+    "Trago Cinema, Psicanálise e Misticismo para dentro de uma mesma sala. Porque a vida só faz sentido quando essas linguagens param de se ignorar."
+  </p>
+</div>
+
+<!-- ══════════ OFERTA ══════════ -->
+<section class="offer-section">
+  <div class="scene-marker">
+    <span class="scene-num">CENA 03</span>
+    <div class="scene-line"></div>
+    <span class="scene-title">O Protocolo</span>
+  </div>
+
+  <div class="offer-box reveal">
+    <p class="offer-price"><span>R$</span>10.000</p>
+    <p class="offer-desc">Investimento único · Grupo fechado de até 8 pessoas · 3 meses</p>
+
+    <ul class="offer-list">
+      <li><strong>Encontros semanais em grupo</strong> com duração de 2h — escuta, investigação, reescrita e acompanhamento.</li>
+      <li><strong>Meditação cinematográfica guiada</strong> em áudio para prática diária noturna.</li>
+      <li><strong>Método de escrita de roteiro</strong> adaptado para autoconhecimento e mudança concreta.</li>
+      <li><strong>Campo de responsabilidade coletiva</strong> — o grupo acompanha a execução real das novas cenas.</li>
+      <li><strong>Facilitação psicanaliticamente informada</strong> por Letícia Dubois Jünger, ao longo de toda a jornada.</li>
+      <li><strong>Conjunto final de cenas reescritas</strong> — seu novo roteiro, em diferentes áreas da vida.</li>
+    </ul>
+
+    <a href="#contato" class="cta-btn"><span>Quero entrar na próxima turma</span></a>
+    <p class="cta-note">Vagas limitadas a 8 participantes por turma</p>
+  </div>
+</section>
+
+<!-- ══════════ CITAÇÃO FINAL ══════════ -->
+<section class="final-section">
+  <p class="final-quote reveal">
+    "O material bruto da sua vida continua existindo.<br>
+    Mas a forma como você o <em>organiza</em> — isso pode mudar."
+  </p>
+  <p class="final-attr reveal" style="margin-top: 16px;">— Protocolo Master Scenes</p>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <span>© Letícia Dubois Jünger</span>
+  <span>Master Scenes · Protocolo</span>
+  <span>@super_femea</span>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
